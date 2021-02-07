@@ -7,11 +7,20 @@
   <body>
 
  <h1> <%= kindofday %> </h1>
+<ul>
+  <li>Buy Food</li>
+  <li>Cook Food</li>
+  <li>Eat Food</li>
+
+  <% for (var i = 0; i < newlistItem.length ;i++){ %>
+    <li><%=newlistItem[i]%></li>
+  <%}%>
+  
+</ul>
 
  <form  action="/" method="post">
-   <input type="text" name="primero">
-   <input type="text" name="segundo">
-   <input type="text" name="tercero">
+   <input type="text" name="newItem">
+
    <button type="submit" name="button"> Add!</button>
  </form>
   </body>
