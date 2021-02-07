@@ -3,7 +3,8 @@ const bodyparser = require("body-parser");
 
 const app = express();
 
-var primerlementos =[];
+let primerlementos = [];
+let workitems = [];
 // app.use(app.router);
 // routes.initialize(app);
 
@@ -17,9 +18,9 @@ app.use(express.static("public"));
 
 app.get("/", function(req, res) {
 
-  var today = new Date();
+  let today = new Date();
 
-  var options = {
+  let options = {
     weekday: "long",
     day: "numeric",
     month: "long"
@@ -30,19 +31,32 @@ app.get("/", function(req, res) {
 
   res.render("list", {
     newlistItem: primerlementos,
-    kindofday: day
+    ListTittle: day
   });
 
 });
 
 app.post("/", function(req, res) {
-  var primerlemento = req.body.newItem;
-  primerlementos.push(primerlemento);
-  res.redirect("/");
+
+  let primerlemento = req.body.newItem;
+
+  if (req.body.list === "work") {
+    workitems.push(primerlemento);
+    res.redirect("/work");
+  } else {
+
+    primerlementos.push(primerlemento);
+    res.redirect("/");
+  }
 
 });
 
-
+app.get("/work", function(req, res) {
+  res.render("list", {
+    newlistItem: workitems,
+    ListTittle: "work List"
+  });
+});
 
 app.listen("3000", function() {
   console.log("Port: 3000 connected!");
