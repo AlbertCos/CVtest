@@ -1,6 +1,8 @@
 const express = require("express");
 const bodyparser = require("body-parser");
 
+const date = require(__dirname+"/date.js")
+
 const app = express();
 
 let primerlementos = [];
@@ -17,17 +19,9 @@ app.use(bodyparser.urlencoded({
 app.use(express.static("public"));
 
 app.get("/", function(req, res) {
+  
+  let day = date();
 
-  let today = new Date();
-
-  let options = {
-    weekday: "long",
-    day: "numeric",
-    month: "long"
-  };
-
-
-  var day = today.toLocaleDateString("en-US", options);
 
   res.render("list", {
     newlistItem: primerlementos,
@@ -57,6 +51,12 @@ app.get("/work", function(req, res) {
     ListTittle: "work List"
   });
 });
+
+app.get("/about", function(req, res) {
+  res.render("about");
+});
+
+
 
 app.listen("3000", function() {
   console.log("Port: 3000 connected!");
