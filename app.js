@@ -1,12 +1,44 @@
 const express = require("express");
 const bodyparser = require("body-parser");
-
-const date = require(__dirname+"/date.js")
+// const date = require(__dirname+"/date.js");
+const mongoose = require("mongoose");
 
 const app = express();
 
-let primerlementos = [];
-let workitems = [];
+
+mongoose.connect("mongodb://localhost:27017/todolistDB",{useNewUrlParser:true});
+
+const itemsSchema= {
+  name:String,
+};
+
+const Item = mongoose.model("Item", itemsSchema);
+
+const item1= new Item({
+  name: "Comprar Bananas"
+});
+
+const item2= new Item({
+  name: "Ir a por naranjas"
+});
+const item3= new Item({
+  name: "Pedir Gasolina"
+});
+
+const defaultItems = [ item1,item2,item3];
+
+Item.insertMany(defaultItems,function(err){
+  if(err){
+    console.log(err);
+  }else{
+    console.log("All right!");
+  }
+});
+
+
+// let primerlementos = [];
+// let workitems = [];
+
 // app.use(app.router);
 // routes.initialize(app);
 
@@ -19,13 +51,13 @@ app.use(bodyparser.urlencoded({
 app.use(express.static("public"));
 
 app.get("/", function(req, res) {
-  
-  let day = date();
+
+  // let day = date();
 
 
   res.render("list", {
     newlistItem: primerlementos,
-    ListTittle: day
+    ListTittle: "Today"
   });
 
 });
