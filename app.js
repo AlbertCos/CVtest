@@ -5,8 +5,10 @@ const mongoose = require("mongoose");
 
 const app = express();
 
+mongoose.set("useNewUrlParser",true);
+mongoose.set("useUnifiedTopology",true);
+mongoose.connect("mongodb://localhost:27017/todolistDB");
 
-mongoose.connect("mongodb://localhost:27017/todolistDB",{useNewUrlParser:true});
 
 const itemsSchema= {
   name:String,
@@ -27,20 +29,6 @@ const item3= new Item({
 
 const defaultItems = [ item1,item2,item3];
 
-Item.insertMany(defaultItems,function(err){
-  if(err){
-    console.log(err);
-  }else{
-    console.log("All right!");
-  }
-});
-
-
-// let primerlementos = [];
-// let workitems = [];
-
-// app.use(app.router);
-// routes.initialize(app);
 
 app.set("view engine", "ejs");
 
@@ -53,28 +41,46 @@ app.use(express.static("public"));
 app.get("/", function(req, res) {
 
   // let day = date();
-
-
-  res.render("list", {
-    newlistItem: primerlementos,
-    ListTittle: "Today"
+  Item.find({},function(err,foundItems){
+      if(foundItems.length===0){
+        Item.insertMany(defaultItems,function(err){
+          if(err){
+            console.log(err);
+          }else{
+            console.log("All right!");
+          }
+        });
+        res.redirect("/");
+      }else{
+        res.render("list", { newlistItem: foundItems,  ListTittle: "Today"});
+      }
   });
-
 });
 
 app.post("/", function(req, res) {
 
-  let primerlemento = req.body.newItem;
+  const itemName =req.body.newItem;
+  const item =new Item({
+    name:itemName
+  });
 
-  if (req.body.list === "work") {
-    workitems.push(primerlemento);
-    res.redirect("/work");
-  } else {
+item.save();
+res.redirect("/");
 
-    primerlementos.push(primerlemento);
-    res.redirect("/");
-  }
+});
 
+app.post("/delete", function(req, res) {
+
+  const checkedItemID = req.body.checkbox;
+  Item.findByIdAndRemove(checkedItemID,function(err){
+    if(err){
+      console.log(err);
+    }else{
+      console.log("deleted successfull!");
+    }
+  })
+  
+  res.redirect("/");
 });
 
 app.get("/work", function(req, res) {
@@ -93,34 +99,3 @@ app.get("/about", function(req, res) {
 app.listen("3000", function() {
   console.log("Port: 3000 connected!");
 });
-
-
-// if (today.getDay() === 6 || today.getDay() === 0) {
-//   day = "Weekend";
-// } else {
-//   day = "Weekday";
-// }
-
-// switch (today.getDay()) {
-//   case 0:
-//     day = "Sunday";
-//     break;
-//   case 1:
-//     day = "Monday";
-//     break;
-//   case 2:
-//     day = "Tuesday";
-//     break;
-//   case 3:
-//     day = "Wednesday";
-//     break;
-//   case 4:
-//     day = "Thursday";
-//     break;
-//   case 5:
-//     day = "Friday";
-//     break;
-//   case 6:
-//     day = "Saturday";
-//     break;
-// }
