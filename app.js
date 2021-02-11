@@ -1,9 +1,16 @@
 const express = require("express");
 const bodyparser = require("body-parser");
-// const date = require(__dirname+"/date.js");
+const _= require("lodash");
 const mongoose = require("mongoose");
 
 const app = express();
+app.set("view engine", "ejs");
+
+app.use(bodyparser.urlencoded({
+  extended: true
+}));
+
+app.use(express.static("public"));
 
 mongoose.set("useNewUrlParser", true);
 mongoose.set("useUnifiedTopology", true);
@@ -16,6 +23,7 @@ const itemsSchema = {
 };
 
 const Item = mongoose.model("Item", itemsSchema);
+
 
 const item1 = new Item({
   name: "Comprar Bananas"
@@ -37,13 +45,7 @@ const listSchema = {
 
 const List = mongoose.model("List", listSchema);
 
-app.set("view engine", "ejs");
 
-app.use(bodyparser.urlencoded({
-  extended: true
-}));
-
-app.use(express.static("public"));
 
 app.get("/", function(req, res) {
 
@@ -59,16 +61,13 @@ app.get("/", function(req, res) {
       });
       res.redirect("/");
     } else {
-      res.render("list", {
-        newlistItem: foundItems,
-        ListTittle: "Today"
-      });
+      res.render("list", {newlistItem: foundItems,ListTittle: "Today"});
     }
   });
 });
 
 app.get("/:customListName", function(req, res) {
-  const customListName = req.params.customListName;
+  const customListName = _.capitalize(req.params.customListName);
 
   List.findOne({
     name: customListName
@@ -86,7 +85,6 @@ app.get("/:customListName", function(req, res) {
           newlistItem: foundList.items,
           ListTittle: foundList.name,
         });
-        res.redirect("/"+ customListName);
       }
     }
   });
@@ -97,30 +95,51 @@ app.get("/:customListName", function(req, res) {
 app.post("/", function(req, res) {
 
   const itemName = req.body.newItem;
+  const listName = req.body.list;
+
   const item = new Item({
     name: itemName
   });
 
-  item.save();
-  res.redirect("/");
+  if(listName === "Today"){
+    item.save();
+    res.redirect("/");
+  }else{
+    List.findOne({name:listName},function(err,foundList){
+      foundList.items.push(item);
+      foundList.save();
+      res.redirect("/"+ listName);
+    });
+
+  }
 
 });
 
 app.post("/delete", function(req, res) {
 
   const checkedItemID = req.body.checkbox;
-  Item.findByIdAndRemove(checkedItemID, function(err) {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log("deleted successfull!");
-    }
-  })
+  const listName = req.body.listName;
 
-  res.redirect("/");
-});
+  if(listName === "Today"){
+    Item.findByIdAndRemove(checkedItemID, function(err) {
+      if (!err) {
+        console.log("deleted successfull!");
+        res.redirect("/");
+      }
+    });
+  }else{
+
+    List.findOneAndUpdate({name:listName},{$pull:{items: {_id:checkedItemID}}},
+    function(err,foundList){
+      if(!err){
+        console.log("deleted successfull!");
+        res.redirect("/"+listName);
+      }
+    });
+  }
 
 
+  });
 
 app.get("/about", function(req, res) {
   res.render("about");
