@@ -15,7 +15,7 @@ app.use(express.static("public"));
 mongoose.set("useNewUrlParser", true);
 mongoose.set("useUnifiedTopology", true);
 mongoose.set("useFindAndModify", false);
-mongoose.connect("mongodb://localhost:27017/todolistDB");
+mongoose.connect("mongodb+srv://admin-alberto:Test123@cluster0.7kyk1.mongodb.net/todolistDB");
 
 
 const itemsSchema = {
